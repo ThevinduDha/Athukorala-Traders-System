@@ -183,42 +183,121 @@ const PromotionDashboard = () => {
           <div className="bg-[#121318] border border-white/10 w-full max-w-lg rounded-[2.8rem] p-10 relative animate-spring-pop shadow-[0_0_80px_rgba(0,0,0,1)]">
             <button onClick={() => setShowModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-yellow-400 hover:rotate-90 transition-all duration-500"><X size={28} /></button>
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">{editMode ? 'Modify Campaign Engine' : 'Initialize Campaign Engine'}</h2>
+              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">{editMode ? 'Modify Campaign Engine' : 'Initialize A Campaign'}</h2>
               <p className="text-gray-600 text-[9px] font-black tracking-[0.4em] uppercase mt-3">Promotion Management • Kaduwela, Western Province</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Campaign Title */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Campaign Title</label>
-                <input type="text" required value={formData.name} className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm uppercase" placeholder="E.G., NEW YEAR BLAST" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.name} 
+                  className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm uppercase transition-all" 
+                  placeholder="E.G., NEW YEAR BLAST" 
+                  onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-0 border border-white/5 rounded-2xl overflow-hidden">
-                <button type="button" onClick={() => setFormData({...formData, discountType: 'PERCENTAGE'})} className={`py-3.5 text-[10px] font-black uppercase tracking-widest transition-all ${formData.discountType === 'PERCENTAGE' ? 'bg-yellow-600 text-black shadow-inner' : 'bg-black/40 text-gray-500'}`}>% Percentage (%)</button>
-                <button type="button" onClick={() => setFormData({...formData, discountType: 'FIXED_AMOUNT'})} className={`py-3.5 text-[10px] font-black uppercase tracking-widest transition-all ${formData.discountType === 'FIXED_AMOUNT' ? 'bg-yellow-600 text-black shadow-inner' : 'bg-black/40 text-gray-500'}`}>$ Fixed Amount (Rs)</button>
+              {/* Discount Type Toggle */}
+              <div className="grid grid-cols-2 gap-0 border border-white/5 rounded-2xl overflow-hidden shadow-inner">
+                <button 
+                  type="button" 
+                  onClick={() => setFormData({...formData, discountType: 'PERCENTAGE'})} 
+                  className={`py-3.5 text-[10px] font-black uppercase tracking-widest transition-all ${formData.discountType === 'PERCENTAGE' ? 'bg-yellow-600 text-black shadow-inner' : 'bg-black/40 text-gray-500 hover:text-gray-300'}`}
+                >
+                  % Percentage (%)
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setFormData({...formData, discountType: 'FIXED_AMOUNT'})} 
+                  className={`py-3.5 text-[10px] font-black uppercase tracking-widest transition-all ${formData.discountType === 'FIXED_AMOUNT' ? 'bg-yellow-600 text-black shadow-inner' : 'bg-black/40 text-gray-500 hover:text-gray-300'}`}
+                >
+                  $ Fixed Amount (Rs)
+                </button>
               </div>
 
+              {/* Logic Value & Target Entity Selection */}
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-1">
                     <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em]">Logic Value</label>
                     <span className="text-[8px] text-gray-600 font-bold uppercase">{formData.discountType === 'PERCENTAGE' ? "0-100%" : "No Limit"}</span>
                   </div>
-                  <input type="number" required min="1" max={formData.discountType === 'PERCENTAGE' ? "100" : "1000000"} value={formData.discountValue} className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm" placeholder="50" onChange={(e) => setFormData({...formData, discountValue: e.target.value})} />
+                  <input 
+                    type="number" 
+                    required 
+                    min="1" 
+                    max={formData.discountType === 'PERCENTAGE' ? "100" : "1000000"} 
+                    value={formData.discountValue} 
+                    className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm transition-all" 
+                    placeholder="50" 
+                    onChange={(e) => setFormData({...formData, discountValue: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Target Entity</label>
-                  <select value={formData.targetType} className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm appearance-none cursor-pointer" onChange={(e) => setFormData({...formData, targetType: e.target.value})}><option value="PRODUCT">PRODUCT</option><option value="SERVICE">SERVICE</option></select>
+                  <select 
+                    value={formData.targetType} 
+                    className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm appearance-none cursor-pointer transition-all" 
+                    onChange={(e) => setFormData({...formData, targetType: e.target.value})}
+                  >
+                    <option value="PRODUCT">PRODUCT</option>
+                    <option value="SERVICE">SERVICE</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
-                <div className="space-y-2"><label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Launch</label><input type="date" required min={!editMode ? new Date().toISOString().split('T')[0] : ""} value={formData.startDate} className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm scheme-dark" onChange={(e) => setFormData({...formData, startDate: e.target.value})} /></div>
-                <div className="space-y-2"><label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Expiry</label><input type="date" required value={formData.endDate} className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm scheme-dark" onChange={(e) => setFormData({...formData, endDate: e.target.value})} /></div>
+              {/* --- NEW: TARGET ID INPUT FIELD --- */}
+              {/* This links the promotion to specific database rows */}
+              <div className="space-y-2 animate-spring-pop">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em]">Target ID (Database Reference)</label>
+                  <span className="text-[8px] text-gray-600 font-bold uppercase italic">Sync with SQL ID</span>
+                </div>
+                <input 
+                  type="number" 
+                  required 
+                  value={formData.targetId || ''} 
+                  className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm transition-all" 
+                  placeholder="E.G., 1 (For Rotary Drill)" 
+                  onChange={(e) => setFormData({...formData, targetId: e.target.value})} 
+                />
               </div>
 
+              {/* Timeline Synchronization */}
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Launch</label>
+                  <input 
+                    type="date" 
+                    required 
+                    min={!editMode ? new Date().toISOString().split('T')[0] : ""} 
+                    value={formData.startDate} 
+                    className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm scheme-dark transition-all" 
+                    onChange={(e) => setFormData({...formData, startDate: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Expiry</label>
+                  <input 
+                    type="date" 
+                    required 
+                    value={formData.endDate} 
+                    className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm scheme-dark transition-all" 
+                    onChange={(e) => setFormData({...formData, endDate: e.target.value})} 
+                  />
+                </div>
+              </div>
+
+              {/* Operational Submit Button */}
               <div className="flex justify-center mt-6">
-                <button type="submit" className="magnetic-reactive w-3/4 bg-yellow-600 hover:bg-yellow-500 py-4 rounded-xl font-black text-black text-sm uppercase tracking-[0.3em] shadow-[0_10px_25px_rgba(234,179,8,0.2)]">
+                <button 
+                  type="submit" 
+                  className="magnetic-reactive w-3/4 bg-yellow-600 hover:bg-yellow-500 py-4 rounded-xl font-black text-black text-sm uppercase tracking-[0.3em] shadow-[0_10px_25px_rgba(234,179,8,0.2)] transition-all active:scale-95"
+                >
                   {editMode ? 'SYNC CHANGES' : 'INITIALIZE ENGINE'} ✨
                 </button>
               </div>
