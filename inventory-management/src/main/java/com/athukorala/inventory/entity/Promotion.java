@@ -14,13 +14,16 @@ public class Promotion {
 
     private String name;
     private Double discountValue;
-    private String discountType;
+    private String discountType; // PERCENTAGE or FIXED_AMOUNT
     private LocalDate startDate;
     private LocalDate endDate;
 
-    // Fixed: Initialized as true so new promotions start active
-    private boolean active = true;
-
+    // Supports GLOBAL, PRODUCT, or SERVICE
     private String targetType;
+
+    // Links to a specific Product ID if targetType is 'PRODUCT'
     private Long targetId;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean active = true;
 }
