@@ -30,24 +30,38 @@ const PromotionDashboard = () => {
   }, []);
 
   // 3. FORM SUBMISSION (CREATE)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Safety Check: Date Validation
-    if (new Date(formData.endDate) < new Date(formData.startDate)) {
-      alert("Error: End date cannot be before the start date!");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  const today = new Date().toISOString().split('T')[0]; // Get today's date (YYYY-MM-DD)
 
-    try {
-      await axios.post('http://localhost:8080/api/promotions', formData);
-      setShowModal(false); // Close Modal
-      fetchPromotions();   // Refresh List
-      alert("Campaign Activated Successfully!");
-    } catch (err) { 
-      alert("Failed to save. Check your Backend logs."); 
-    }
-  };
+  // 1. Past Date Validation
+  if (formData.startDate < today) {
+    alert("Error: Start date cannot be in the past!");
+    return;
+  }
+
+  // 2. Date Range Validation
+  if (formData.endDate < formData.startDate) {
+    alert("Error: End date must be after the start date!");
+    return;
+  }
+
+  // 3. Negative Value Validation
+  if (formData.discountValue <= 0) {
+    alert("Error: Discount value must be a positive number!");
+    return;
+  }
+
+  try {
+    await axios.post('http://localhost:8080/api/promotions', formData);
+    setShowModal(false);
+    fetchPromotions();
+    alert("Campaign Activated Successfully!");
+  } catch (err) {
+    alert("Backend Error: Check if IntelliJ is running.");
+  }
+};
 
   // 4. DELETE LOGIC
   const deletePromo = async (id) => {
@@ -174,65 +188,71 @@ const PromotionDashboard = () => {
               <p className="text-gray-400">Configure parameters for industrial tool discounts.</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Campaign Title</label>
-                <input 
-                  type="text" required
-                  className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 transition-all text-white placeholder:text-gray-700 font-bold"
-                  placeholder="e.g. DRILL BLAST SALE"
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
+<form onSubmit={handleSubmit} className="space-y-6">
+  {/* Campaign Name */}
+  <div className="space-y-2">
+    <label className="text-[10px] font-black text-yellow-500/70 uppercase tracking-[0.2em] ml-1">Campaign Title</label>
+    <input 
+      type="text" required
+      className="w-full bg-black/40 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 transition-all text-white placeholder:text-gray-700 font-bold"
+      placeholder="E.G. NEW YEAR BLAST"
+      onChange={(e) => setFormData({...formData, name: e.target.value})}
+    />
+  </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Logic Type</label>
-                  <select 
-                    className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold appearance-none cursor-pointer"
-                    onChange={(e) => setFormData({...formData, discountType: e.target.value})}
-                  >
-                    <option value="PERCENTAGE">PERCENTAGE (%)</option>
-                    <option value="FIXED_AMOUNT">FIXED (Rs)</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Discount Value</label>
-                  <input 
-                    type="number" required
-                    className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold"
-                    placeholder="0.00"
-                    onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
-                  />
-                </div>
-              </div>
+  <div className="grid grid-cols-2 gap-6">
+    {/* Type Selection */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-yellow-500/70 uppercase tracking-[0.2em] ml-1">Logic Type</label>
+      <select 
+        className="w-full bg-black/40 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold cursor-pointer"
+        onChange={(e) => setFormData({...formData, discountType: e.target.value})}
+      >
+        <option value="PERCENTAGE">PERCENTAGE (%)</option>
+        <option value="FIXED_AMOUNT">FIXED (RS)</option>
+      </select>
+    </div>
+    
+    {/* Value Input (Min set to 1) */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-yellow-500/70 uppercase tracking-[0.2em] ml-1">Value</label>
+      <input 
+        type="number" min="1" required
+        className="w-full bg-black/40 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold"
+        placeholder="0"
+        onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
+      />
+    </div>
+  </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Launch Date</label>
-                  <input 
-                    type="date" required
-                    className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold"
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Expiry Date</label>
-                  <input 
-                    type="date" required
-                    className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold"
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                  />
-                </div>
-              </div>
+  <div className="grid grid-cols-2 gap-6">
+    {/* Start Date (Min set to Today) */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-yellow-500/70 uppercase tracking-[0.2em] ml-1">Launch Date</label>
+      <input 
+        type="date" 
+        min={new Date().toISOString().split('T')[0]} 
+        required
+        className="w-full bg-black/40 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold scheme-dark"
+        onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+      />
+    </div>
+    
+    {/* End Date */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-yellow-500/70 uppercase tracking-[0.2em] ml-1">Expiry Date</label>
+      <input 
+        type="date" required
+        className="w-full bg-black/40 border-2 border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-yellow-500 text-white font-bold scheme-dark"
+        onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+      />
+    </div>
+  </div>
 
-              <button 
-                type="submit"
-                className="w-full bg-yellow-500 hover:bg-yellow-400 py-5 rounded-2xl font-black text-black text-lg shadow-xl shadow-yellow-500/20 mt-4 transition-all active:scale-[0.98] uppercase tracking-[0.1em]"
-              >
-                ACTIVATE CAMPAIGN
-              </button>
-            </form>
+  <button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-400 py-5 rounded-2xl font-black text-black text-lg shadow-xl shadow-yellow-500/20 mt-4 transition-all active:scale-[0.98] uppercase tracking-[0.1em]">
+    ACTIVATE CAMPAIGN
+  </button>
+</form>
           </div>
         </div>
       )}
