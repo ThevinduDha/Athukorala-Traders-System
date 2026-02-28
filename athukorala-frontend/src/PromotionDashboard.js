@@ -9,7 +9,7 @@ const PromotionDashboard = () => {
   const [promotions, setPromotions] = useState([]);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'error' });
   const [formData, setFormData] = useState({
-    name: '', discountValue: '', discountType: 'PERCENTAGE', startDate: '', endDate: '', targetType: 'PRODUCT'
+    name: '', discountValue: '', discountType: 'PERCENTAGE', startDate: '', endDate: '', targetType: 'PRODUCT', targetId: ''
   });
 
   const triggerToast = (msg, type = 'error') => {
@@ -36,7 +36,8 @@ const PromotionDashboard = () => {
       startDate: promo.startDate,
       endDate: promo.endDate,
       targetType: promo.targetType,
-      active: promo.active // Matches Java field name
+      targetId: promo.targetId || '',
+      active: promo.active 
     });
     setShowModal(true);
   };
@@ -44,13 +45,12 @@ const PromotionDashboard = () => {
   const openCreateModal = () => {
     setEditMode(false);
     setSelectedId(null);
-    setFormData({ name: '', discountValue: '', discountType: 'PERCENTAGE', startDate: '', endDate: '', targetType: 'PRODUCT' });
+    setFormData({ name: '', discountValue: '', discountType: 'PERCENTAGE', startDate: '', endDate: '', targetType: 'PRODUCT', targetId: '' });
     setShowModal(true);
   };
 
   const toggleStatus = async (promo) => {
     try {
-      // FIX: Use 'active' to match Java entity
       const updatedPromo = { ...promo, active: !promo.active }; 
       await axios.put(`http://localhost:8080/api/promotions/${promo.id}`, updatedPromo);
       fetchPromotions();
@@ -67,6 +67,11 @@ const PromotionDashboard = () => {
     if (formData.discountType === 'PERCENTAGE' && val > 100) return triggerToast("Percentage cannot exceed 100%!");
     if (!editMode && formData.startDate < today) return triggerToast("Launch date cannot be in the past!");
     if (formData.endDate < formData.startDate) return triggerToast("Expiry must be after Launch!");
+    
+    // Validate Target ID if not Global
+    if (formData.targetType !== 'GLOBAL' && !formData.targetId) {
+      return triggerToast("Target ID is required for non-global offers!");
+    }
 
     try {
       if (editMode) {
@@ -84,7 +89,6 @@ const PromotionDashboard = () => {
   return (
     <div className="p-8 max-w-6xl mx-auto min-h-screen font-sans selection:bg-yellow-500/30">
       
-      {/* Toast */}
       {toast.show && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[3000] px-6 py-3 rounded-xl border bg-black/80 backdrop-blur-xl animate-spring-pop flex items-center gap-3 border-yellow-500/30 text-yellow-500 shadow-2xl">
           {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
@@ -92,7 +96,6 @@ const PromotionDashboard = () => {
         </div>
       )}
 
-      {/* HEADER */}
       <header className="flex justify-between items-end mb-14 animate-spring-pop">
         <div>
           <div className="flex items-center gap-2 text-yellow-500/60 mb-1 text-[9px] font-bold uppercase tracking-[0.3em] animate-blink-industrial">
@@ -112,7 +115,6 @@ const PromotionDashboard = () => {
         </button>
       </header>
 
-      {/* STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
         {[
           { label: 'Live Campaigns', val: promotions.length, icon: <TrendingUp size={22}/> },
@@ -130,7 +132,6 @@ const PromotionDashboard = () => {
         ))}
       </div>
 
-      {/* CAMPAIGN LIST */}
       <div className="space-y-4">
         <h3 className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em] mb-8 ml-1 flex items-center gap-3">
           <Tag size={14} /> Data Stream Synchronization Active
@@ -139,7 +140,6 @@ const PromotionDashboard = () => {
           <div 
             key={promo.id} 
             style={{ animationDelay: `${0.3 + (idx * 0.05)}s` }}
-            // FIX: Check promo.active for visual status
             className={`bg-white/[0.02] border p-7 rounded-[1.8rem] flex items-center justify-between group transition-all duration-700 border-white/5 hover:border-yellow-500/30 animate-spring-pop ${!promo.active ? 'opacity-30 grayscale blur-[0.5px]' : 'opacity-100'}`}
           >
             <div className="flex items-center gap-8">
@@ -148,11 +148,10 @@ const PromotionDashboard = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter group-hover:text-yellow-400 transition-colors leading-none">
-                    {/* FIX: Check promo.active for label */}
                     {promo.name} {!promo.active && '(DEACTIVATED)'}
                 </h3>
                 <p className="text-[10px] text-gray-500 mt-2 uppercase font-bold tracking-widest flex items-center gap-2">
-                   <Calendar size={13}/> {promo.startDate} <span className="text-yellow-500/20">|</span> Target: {promo.targetType}
+                   <Calendar size={13}/> {promo.startDate} <span className="text-yellow-500/20">|</span> Target: {promo.targetType} {promo.targetType === 'PRODUCT' && `[ID: ${promo.targetId}]`}
                 </p>
               </div>
             </div>
@@ -177,7 +176,6 @@ const PromotionDashboard = () => {
         ))}
       </div>
 
-      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl flex items-center justify-center z-[2000] p-6">
           <div className="bg-[#121318] border border-white/10 w-full max-w-lg rounded-[2.8rem] p-10 relative animate-spring-pop shadow-[0_0_80px_rgba(0,0,0,1)]">
@@ -188,7 +186,6 @@ const PromotionDashboard = () => {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campaign Title */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Campaign Title</label>
                 <input 
@@ -201,7 +198,6 @@ const PromotionDashboard = () => {
                 />
               </div>
 
-              {/* Discount Type Toggle */}
               <div className="grid grid-cols-2 gap-0 border border-white/5 rounded-2xl overflow-hidden shadow-inner">
                 <button 
                   type="button" 
@@ -219,7 +215,6 @@ const PromotionDashboard = () => {
                 </button>
               </div>
 
-              {/* Logic Value & Target Entity Selection */}
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-1">
@@ -244,30 +239,31 @@ const PromotionDashboard = () => {
                     className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm appearance-none cursor-pointer transition-all" 
                     onChange={(e) => setFormData({...formData, targetType: e.target.value})}
                   >
-                    <option value="PRODUCT">PRODUCT</option>
+                    <option value="GLOBAL">STORE-WIDE (GLOBAL)</option>
+                    <option value="PRODUCT">SPECIFIC PRODUCT</option>
                     <option value="SERVICE">SERVICE</option>
                   </select>
                 </div>
               </div>
 
-              {/* --- NEW: TARGET ID INPUT FIELD --- */}
-              {/* This links the promotion to specific database rows */}
-              <div className="space-y-2 animate-spring-pop">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em]">Target ID (Database Reference)</label>
-                  <span className="text-[8px] text-gray-600 font-bold uppercase italic">Sync with SQL ID</span>
+              {/* Conditional Target ID field - Only show if not Global */}
+              {formData.targetType !== 'GLOBAL' && (
+                <div className="space-y-2 animate-spring-pop">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em]">Target ID (Database Reference)</label>
+                    <span className="text-[8px] text-gray-600 font-bold uppercase italic">Sync with SQL ID</span>
+                  </div>
+                  <input 
+                    type="number" 
+                    required 
+                    value={formData.targetId || ''} 
+                    className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm transition-all" 
+                    placeholder="E.G., 1 (For Rotary Drill)" 
+                    onChange={(e) => setFormData({...formData, targetId: e.target.value})} 
+                  />
                 </div>
-                <input 
-                  type="number" 
-                  required 
-                  value={formData.targetId || ''} 
-                  className="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-white font-bold text-sm transition-all" 
-                  placeholder="E.G., 1 (For Rotary Drill)" 
-                  onChange={(e) => setFormData({...formData, targetId: e.target.value})} 
-                />
-              </div>
+              )}
 
-              {/* Timeline Synchronization */}
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.4em] ml-1">Launch</label>
@@ -292,7 +288,6 @@ const PromotionDashboard = () => {
                 </div>
               </div>
 
-              {/* Operational Submit Button */}
               <div className="flex justify-center mt-6">
                 <button 
                   type="submit" 
