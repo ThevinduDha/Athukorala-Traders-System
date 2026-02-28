@@ -14,10 +14,13 @@ public class Promotion {
 
     private String name;
     private Double discountValue;
-    private String discountType; // 'PERCENTAGE' or 'FIXED_AMOUNT'
+    private String discountType;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Boolean isActive = true;
-    private String targetType; // 'PRODUCT' or 'CATEGORY'
+
+    // Fixed: Initialized as true so new promotions start active
+    private boolean active = true;
+
+    private String targetType;
     private Long targetId;
 }
