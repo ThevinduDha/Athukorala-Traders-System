@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import PromotionDashboard from './PromotionDashboard';
-import InventoryGrid from './InventoryGrid';
+import Sidebar from './components/Sidebar';
+import PromotionDashboard from './pages/PromotionDashboard';
+import InventoryGrid from './pages/InventoryGrid';
 
 const App = () => {
   // Navigation state to control the Main Terminal
