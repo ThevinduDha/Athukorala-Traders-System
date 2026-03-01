@@ -18,32 +18,35 @@ public class DiscountService {
     public Double calculateDiscountedPrice(Product product) {
         LocalDate today = LocalDate.now();
 
-        // Fetch all currently active campaigns within the valid date range
+        // Fetch all currently active and enabled campaigns
         List<Promotion> activeCampaigns = promotionRepository.findAll().stream()
                 .filter(p -> p.isActive() &&
                         !today.isBefore(p.getStartDate()) &&
-                        !today.isAfter(p.getEndDate()))
+                        !today.isAfter(p.getEndDate()) &&
+                        ("GLOBAL".equals(p.getTargetType()) ||
+                                (product.getId().equals(p.getTargetId()) && "PRODUCT".equals(p.getTargetType()))))
                 .toList();
 
         if (activeCampaigns.isEmpty()) return product.getBasePrice();
 
-        // 1. Check for a SPECIFIC Product Discount first (High Priority)
-        Optional<Promotion> specificDiscount = activeCampaigns.stream()
-                .filter(p -> "PRODUCT".equals(p.getTargetType()) &&
-                        product.getId().equals(p.getTargetId()))
-                .findFirst();
+        // 1. Find the MAX percentage discount
+        double maxPercentage = activeCampaigns.stream()
+                .filter(p -> "PERCENTAGE".equals(p.getDiscountType()))
+                .mapToDouble(Promotion::getDiscountValue)
+                .max().orElse(0.0);
 
-        // 2. Fallback to GLOBAL Store-wide Promotion (Medium Priority)
-        Optional<Promotion> globalPromo = activeCampaigns.stream()
-                .filter(p -> "GLOBAL".equals(p.getTargetType()))
-                .findFirst();
+        // 2. Find the MAX fixed amount discount
+        double maxFixed = activeCampaigns.stream()
+                .filter(p -> "FIXED_AMOUNT".equals(p.getDiscountType()))
+                .mapToDouble(Promotion::getDiscountValue)
+                .max().orElse(0.0);
 
-        // Determine which promotion to apply
-        Promotion selectedPromo = specificDiscount.orElse(globalPromo.orElse(null));
+        // 3. Calculate both possible prices
+        double priceWithPercent = product.getBasePrice() * (1 - (maxPercentage / 100.0));
+        double priceWithFixed = Math.max(0.0, product.getBasePrice() - maxFixed);
 
-        if (selectedPromo == null) return product.getBasePrice();
-
-        return applyDiscountCalculation(product.getBasePrice(), selectedPromo);
+        // 4. Return the LOWEST price (Best deal for the customer)
+        return Math.min(priceWithPercent, priceWithFixed);
     }
 
     private Double applyDiscountCalculation(Double basePrice, Promotion promo) {
