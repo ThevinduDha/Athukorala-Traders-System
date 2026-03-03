@@ -1,7 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, Tag, Box, Users, BarChart3, Settings, LogOut, ShieldCheck } from 'lucide-react';
 
-// Added setActiveTab prop to handle sector switching
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const menuItems = [
     { id: 'dashboard', label: 'DASHBOARD', icon: <LayoutDashboard size={20} /> },
@@ -30,16 +29,19 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         {menuItems.map((item) => (
           <button
             key={item.id}
-            // Triggers state change in App.js
             onClick={() => setActiveTab(item.id)} 
             className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 magnetic-reactive group outline-none ${
-              activeTab === item.id ? 'nav-link-active' : 'nav-link-idle'
+              activeTab === item.id ? 'bg-yellow-500/10 border border-yellow-500/20' : 'hover:bg-white/5'
             }`}
           >
-            <div className={`${activeTab === item.id ? 'text-yellow-500' : 'group-hover:text-yellow-400'}`}>
+            <div className={`${activeTab === item.id ? 'text-yellow-500' : 'text-gray-500 group-hover:text-yellow-400'}`}>
               {item.icon}
             </div>
-            <span className="text-[11px] font-black tracking-[0.2em] uppercase italic">{item.label}</span>
+            <span className={`text-[11px] font-black tracking-[0.2em] uppercase italic ${
+              activeTab === item.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'
+            }`}>
+              {item.label}
+            </span>
           </button>
         ))}
       </nav>
@@ -53,7 +55,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           <LogOut size={18} /> Terminal Exit
         </button>
         
-        {/* System Health Indicator - Matches "Market Impact: Optimal" branding */}
+        {/* System Health Indicator */}
         <div className="mt-6 px-4 py-3 bg-white/[0.02] rounded-xl border border-white/5">
           <p className="text-[8px] text-gray-700 font-black uppercase tracking-tighter">System Health</p>
           <div className="flex items-center gap-2 mt-1">
