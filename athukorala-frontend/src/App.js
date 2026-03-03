@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import PromotionDashboard from './pages/PromotionDashboard';
 import InventoryGrid from './pages/InventoryGrid';
+import Analytics from './pages/Analytics';
 
 const App = () => {
   // Navigation state to control the Main Terminal
-  const [activeTab, setActiveTab] = useState('promotion');
+  // Defaulting to 'inventory' as it's the core module
+  const [activeTab, setActiveTab] = useState('inventory');
 
   return (
     <div className="flex bg-[#0b0c10] min-h-screen selection:bg-yellow-500/30 overflow-hidden">
       
       {/* 1. FIXED NAVIGATION TERMINAL */}
-      {/* Pass activeTab and setActiveTab to Sidebar to enable switching */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* 2. DYNAMIC OPERATIONAL AREA */}
@@ -32,8 +33,12 @@ const App = () => {
             <div className="animate-spring-pop">
               <InventoryGrid />
             </div>
+          ) : activeTab === 'analytics' || activeTab === 'dashboard' ? (
+            <div className="animate-spring-pop">
+              <Analytics />
+            </div>
           ) : (
-            /* Fallback for other sectors like Staff or Analytics */
+            /* Fallback for other sectors like Staff */
             <div className="flex items-center justify-center h-screen">
               <p className="text-gray-700 font-black uppercase tracking-[0.5em] animate-pulse">
                 Sector {activeTab} Offline
